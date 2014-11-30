@@ -3,7 +3,10 @@
 
 <cfdump var="#session#">
 
-<cfset albumResponse = application.objSpotify.getNewReleases(access_token=session.access.access_token) />
+<cfset albumResponse = application.objSpotify.search(q="Butch Walker", type="album", access_token=session.access.access_token, json=false) />
+<cfdump var="#albumResponse#" />
+
+<cfset albumResponse = application.objSpotify.getMyTracks(access_token=session.access.access_token, json=false) />
 
 <cfdump var="#albumResponse#" />
 
