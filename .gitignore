@@ -1,0 +1,5 @@
+.project
+.DS_Store
+.settings/
+.settings/*
+node_modules/*
