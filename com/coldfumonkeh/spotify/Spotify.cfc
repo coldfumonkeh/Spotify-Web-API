@@ -1,3 +1,26 @@
+/**
+* Name: monkehTweet.cfc
+* Author: Matt Gifford (http://www.monkehworks.com)
+* Date: 1st December 2014
+* Copyright 2014 Matt Gifford.
+*
+* All rights reserved.
+* Product and company names mentioned herein may be trademarks or trade names of their respective owners.
+* Subject to the conditions below, you may, without charge:
+* Use, copy, modify and/or merge copies of this software and associated documentation files (the 'Software')
+* Any person dealing with the Software shall not misrepresent the source of the Software.
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+* OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
+*
+* Got a lot out of this package? Saved you time and money?
+* Share the love and visit the wishlist: http://www.amazon.co.uk/wishlist/B9PFNDZNH4PY
+**/
+
 component accessors="true" {
 
 	property name="clientID" 			type="string";
@@ -7,7 +30,9 @@ component accessors="true" {
 	property name="auth_base"			type="string";
 
 	/**
-	* @hint "Constructor method"
+	* @clientID string Required. The client ID provided to you by Spotify when you register your application..
+	* @clientSecret string Required. The Spotify API Client Secret.
+	* @redirect_uri string Required. The redirect_uri (or one of if multiple) stored against the app.
 	*/
 	public function init (
 			required string clientID,
@@ -23,13 +48,21 @@ component accessors="true" {
 		return this;
 	}
 
+	/**
+	* @client_id string Required. The client ID provided to you by Spotify when you register your application.
+	* @response_type string Required. Set it to code.
+	* @redirect_uri string Required. The URI to redirect to after the user grants/denies permission. This URI needs to have been entered in the Redirect URI whitelist that you specified when you registered your application. The value of redirect_uri here must exactly match one of the values you entered when you registered your application, including upper/lowercase, terminating slashes, etc.
+	* @state string Required. The state can be useful for correlating requests and responses. Because your redirect_uri can be guessed, using a state value can increase your assurance that an incoming connection is the result of an authentication request. If you generate a random string or encode the hash of some client state (e.g., a cookie) in this state variable, you can validate the response to additionally ensure that the request and response originated in the same browser. This provides protection against attacks such as cross-site request forgery
+	* @scope string Optional. A space-separated list of scopes: see Using Scopes. If no scopes are specified, authorization will be granted only to access publicly available information: that is, only information normally visible in the Spotify desktop, web and mobile players.
+	* @show_dialog boolean Optional. Whether or not to force the user to approve the app again if they’ve already done so. If false (default), a user who has already approved the application may be automatically redirected to the URI specified by redirect_uri. If true, the user will not be automatically redirected and will have to approve the app again.
+	**/
 	public string function authorize(
-			required 	string client_id = getClientID() 				hint="The client ID provided to you by Spotify when you register your application.",
+			required 	string client_id = getClientID(),
 			required 	string response_type = "code",
-			required 	string redirect_uri = getRedirect_uri() hint="The URI to redirect to after the user grants/denies permission. This URI needs to have been entered in the Redirect URI whitelist that you specified when you registered your application. The value of redirect_uri here must exactly match one of the values you entered when you registered your application, including upper/lowercase, terminating slashes, etc.",
-			required 	string state = hash(CreateUUID()) 			hint=" The state can be useful for correlating requests and responses. Because your redirect_uri can be guessed, using a state value can increase your assurance that an incoming connection is the result of an authentication request. If you generate a random string or encode the hash of some client state (e.g., a cookie) in this state variable, you can validate the response to additionally ensure that the request and response originated in the same browser. This provides protection against attacks such as cross-site request forgery",
-								string scope ="" 												hint="A space-separated list of scopes: see Using Scopes. If no scopes are specified, authorization will be granted only to access publicly available information: that is, only information normally visible in the Spotify desktop, web and mobile players.",
-			boolean 	show_dialog =false 											hint="Whether or not to force the user to approve the app again if they’ve already done so. If false (default), a user who has already approved the application may be automatically redirected to the URI specified by redirect_uri. If true, the user will not be automatically redirected and will have to approve the app again."
+			required 	string redirect_uri = getRedirect_uri(),
+			required 	string state = hash(CreateUUID()),
+								string scope ="",
+			boolean 	show_dialog =false
 		)
 	{
 		var strURL=getAuth_base() & "/authorize/?" & buildParamString(arguments);
@@ -47,7 +80,7 @@ component accessors="true" {
 		var request = {};
 		var requestData = {};
 		var httpService = new http(url=getAuth_base() & "/api/token", method="POST");
-			httpService.addParam(type="header",name="Authorization", value="Basic #toBase64(getClientID() & ':' & getClientSecret())#");
+			httpService.addParam(type="header",name="Authorization", value="Basic #createAuthBase64(getClientID(), getClientSecret())#");
 			httpService.addParam(type="formfield",name="grant_type",value=arguments.grant_type);
 			if ( len(arguments.scope) ) {
 				httpService.addParam(type="formfield",name="scope",value=arguments.scope);
@@ -345,7 +378,7 @@ component accessors="true" {
 
 	/* Track Data */
 
-	
+
 
 	/****************/
 	/* UTILS        */
@@ -379,7 +412,7 @@ component accessors="true" {
 	/**
 	* hint I loop through a struct to convert to query params for the URL
 	*/
-	private function buildParamString(argScope)
+	private function buildParamString(required struct argScope)
 	{
 		var strURLParam = "";
 		for (key in arguments.argScope) {
@@ -391,6 +424,12 @@ component accessors="true" {
 			}
 		}
 		return strURLParam;
+	}
+
+
+	public function createAuthBase64(required string clientId, required string clientSecret)
+	{
+		return toBase64(arguments.clientId & ':' & arguments.clientSecret);
 	}
 
 }
