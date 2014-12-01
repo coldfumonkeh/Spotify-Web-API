@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/coldfumonkeh/Spotify-Web-API.svg?branch=master)](https://travis-ci.org/coldfumonkeh/Spotify-Web-API)
 
-# monkehTweets ColdFusion Twitter API
+# Spotify Web API ColdFusion Twitter API
 
 ---
 
@@ -31,4 +31,4 @@ This component requires ColdFusion 9+
 One of the questions received in regards to monkehTweets is how to manage authentication for multiple users.
 You can find the answer right here:
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/coldfumonkeh/Spotify-Web-API/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/coldfumonkeh/spotify-web-api/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
