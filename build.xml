@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project basedir="." default="test" name="monkehTweet">
 
-  <!--
-  The monkehTweets project.
-
+<!--
   For integration instructions, see the Github project page:
 
   https://github.com/marcins/cfml-ci
@@ -11,7 +9,7 @@
 
 <!-- you should change this value to a short name for your project
 will be used a symlink so shouldn't contain spaces -->
-<property name="test.project" value="monkehTweet" />
+<property name="test.project" value="spotifywebapi" />
 
 <!-- these properties can either be passed in from your build server
 (recommended), or set here if you're sure about that -->
