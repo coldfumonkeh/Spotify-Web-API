@@ -10,7 +10,6 @@ This is a ColdFusion Wrapper written to interact with the Spotify Web API.
 
 Developed by Matt Gifford (aka coldfumonkeh)
 
-- http://www.mattgifford.co.uk
 - http://www.monkehworks.com
 
 
