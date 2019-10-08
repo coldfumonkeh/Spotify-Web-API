@@ -23,11 +23,11 @@
 
 component accessors="true" {
 
-	property name="clientID" type="string";
-	property name="clientSecret" type="string";
-	property name="redirect_uri" type="string";
-	property name="api_base" type="string";
-	property name="auth_base" type="string";
+	property name = "clientID" type = "string";
+	property name = "clientSecret" type = "string";
+	property name = "redirect_uri" type = "string";
+	property name = "api_base" type = "string";
+	property name = "auth_base" type = "string";
 
 	/**
 	* @clientID string Required. The client ID provided to you by Spotify when you register your application..
@@ -35,16 +35,15 @@ component accessors="true" {
 	* @redirect_uri string Required. The redirect_uri (or one of if multiple) stored against the app.
 	*/
 	public function init (
-			required string clientID,
-			required string clientSecret,
-			required string redirect_uri
-		)
-	{
-		setclientID(arguments.clientID);
-		setclientSecret(arguments.clientSecret);
-		setRedirect_uri(arguments.redirect_uri);
-		setApi_base('https://api.spotify.com/v1');
-		setAuth_base('https://accounts.spotify.com');
+		required string clientID,
+		required string clientSecret,
+		required string redirect_uri
+	){
+		setclientID( arguments.clientID );
+		setclientSecret( arguments.clientSecret );
+		setRedirect_uri( arguments.redirect_uri );
+		setApi_base( 'https://api.spotify.com/v1' );
+		setAuth_base( 'https://accounts.spotify.com' );
 		return this;
 	}
 
@@ -57,29 +56,27 @@ component accessors="true" {
 	* @show_dialog boolean Optional. Whether or not to force the user to approve the app again if they’ve already done so. If false (default), a user who has already approved the application may be automatically redirected to the URI specified by redirect_uri. If true, the user will not be automatically redirected and will have to approve the app again.
 	**/
 	public string function authorize(
-			required 	string client_id    = getClientID(),
-			required 	string response_type = "code",
-			required 	string redirect_uri = getRedirect_uri(),
-			required 	string state        = hash(CreateUUID()),
-			string scope                  = "",
-			boolean 	show_dialog          = false
-		)
-	{
+		required string client_id     = getClientID(),
+		required string response_type = "code",
+		required string redirect_uri  = getRedirect_uri(),
+		required string state         = hash( createUUID() ),
+		string scope                  = "",
+		boolean show_dialog           = false
+	){
 		var strURL = getAuth_base() & "/authorize/?" & buildParamString( arguments );
 		return strURL;
 	}
 
 	public struct function requestToken(
-			required string grant_type,
-			required string scope = "",
-			required string code = "",
-			required string redirect_uri = getRedirect_uri(),
-			required string refresh_token = ""
-		)
-	{
+		required string grant_type,
+		required string scope        = "",
+		required string code         = "",
+		required string redirect_uri = getRedirect_uri(),
+		required string refresh_token = ""
+	){
 		var stuResponse = {};
 		var requestData = {};
-		var httpService = new http(url=getAuth_base() & "/api/token", method="POST");
+		var httpService = new http( url = getAuth_base() & "/api/token", method = "POST" );
 			httpService.addParam(type="header",name="Authorization", value="Basic #createAuthBase64(getClientID(), getClientSecret())#");
 			httpService.addParam(type="formfield",name="grant_type",value=arguments.grant_type);
 			if ( len(arguments.scope) ) {
@@ -101,10 +98,9 @@ component accessors="true" {
 
 
 	public struct function refreshToken(
-			required string grant_type,
-			required string refresh_token
-		)
-	{
+		required string grant_type,
+		required string refresh_token
+	){
 		return requestToken(grant_type=arguments.grant_type, refresh_token=arguments.refresh_token);
 	}
 
@@ -122,10 +118,9 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getAlbum(
-			required string id,
-			boolean json = true
-		)
-	{
+		required string id,
+		boolean json = true
+	){
 		return makeRequest(url=getApi_base() & "/albums/" & arguments.id, json=arguments.json);
 	}
 
@@ -133,10 +128,9 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getAlbums(
-			required string ids,
-			boolean json = true
-		)
-	{
+		required string ids,
+		boolean json = true
+	){
 		return makeRequest(url=getApi_base() & "/albums?ids=" & arguments.ids, json=arguments.json);
 	}
 
@@ -147,12 +141,11 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getAlbumTracks(
-			required string id,
-			string limit = "20",
-			string offset ="0",
-			boolean json = true
-		)
-	{
+		required string id,
+		string limit = "20",
+		string offset ="0",
+		boolean json = true
+	){
 		var args = structcopy(arguments);
 		structDelete(args,"id");
 		return makeRequest(url=getApi_base() & "/albums/" & arguments.id & "/tracks?" & buildParamString(args), json=arguments.json);
@@ -165,10 +158,9 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getArtist(
-			required string id,
-			boolean json = true
-		)
-	{
+		required string id,
+		boolean json = true
+	){
 		return makeRequest(url=getApi_base() & "/artists/" & arguments.id, json=arguments.json);
 	}
 
@@ -176,10 +168,9 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getArtists(
-				required string ids,
-				boolean json = true
-			)
-	{
+		required string ids,
+		boolean json = true
+	){
 		return makeRequest(url=getApi_base() & "/artists?ids=" & arguments.ids, json=arguments.json);
 	}
 
