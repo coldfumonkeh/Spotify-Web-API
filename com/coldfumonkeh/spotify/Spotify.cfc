@@ -1,8 +1,8 @@
 /**
-* Name: monkehTweet.cfc
+* Name: Spotify.cfc
 * Author: Matt Gifford (http://www.monkehworks.com)
 * Date: 1st December 2014
-* Copyright 2014 Matt Gifford.
+* Copyright 2019 Matt Gifford.
 *
 * All rights reserved.
 * Product and company names mentioned herein may be trademarks or trade names of their respective owners.
@@ -18,16 +18,16 @@
 *
 *
 * Got a lot out of this package? Saved you time and money?
-* Share the love and visit the wishlist: http://www.amazon.co.uk/wishlist/B9PFNDZNH4PY
+* Share the love and donate some money to a good cause: https://www.alzheimers.org.uk/get-involved/make-donation
 **/
 
 component accessors="true" {
 
-	property name="clientID" 			type="string";
-	property name="clientSecret" 	type="string";
-	property name="redirect_uri"	type="string";
-	property name="api_base"			type="string";
-	property name="auth_base"			type="string";
+	property name="clientID" type="string";
+	property name="clientSecret" type="string";
+	property name="redirect_uri" type="string";
+	property name="api_base" type="string";
+	property name="auth_base" type="string";
 
 	/**
 	* @clientID string Required. The client ID provided to you by Spotify when you register your application..
@@ -57,27 +57,27 @@ component accessors="true" {
 	* @show_dialog boolean Optional. Whether or not to force the user to approve the app again if they’ve already done so. If false (default), a user who has already approved the application may be automatically redirected to the URI specified by redirect_uri. If true, the user will not be automatically redirected and will have to approve the app again.
 	**/
 	public string function authorize(
-			required 	string client_id = getClientID(),
+			required 	string client_id    = getClientID(),
 			required 	string response_type = "code",
 			required 	string redirect_uri = getRedirect_uri(),
-			required 	string state = hash(CreateUUID()),
-								string scope ="",
-			boolean 	show_dialog =false
+			required 	string state        = hash(CreateUUID()),
+			string scope                  = "",
+			boolean 	show_dialog          = false
 		)
 	{
-		var strURL=getAuth_base() & "/authorize/?" & buildParamString(arguments);
+		var strURL = getAuth_base() & "/authorize/?" & buildParamString( arguments );
 		return strURL;
 	}
 
 	public struct function requestToken(
 			required string grant_type,
-			required string scope ="",
+			required string scope = "",
 			required string code = "",
 			required string redirect_uri = getRedirect_uri(),
 			required string refresh_token = ""
 		)
 	{
-		var request = {};
+		var stuResponse = {};
 		var requestData = {};
 		var httpService = new http(url=getAuth_base() & "/api/token", method="POST");
 			httpService.addParam(type="header",name="Authorization", value="Basic #createAuthBase64(getClientID(), getClientSecret())#");
@@ -94,8 +94,8 @@ component accessors="true" {
 			if ( len(arguments.refresh_token) ) {
 				httpService.addParam(type="formfield",name="refresh_token",value=arguments.refresh_token);
 			}
-		request = httpService.send().getPrefix();
-		requestData = deserializeJSON(request.FileContent);
+			stuResponse = httpService.send().getPrefix();
+		requestData = deserializeJSON( stuResponse.FileContent );
 		return requestData;
 	}
 
@@ -316,7 +316,8 @@ component accessors="true" {
 	**/
 	public any function saveTracksForUser(
 			required string access_token,
-			required string ids
+			required string ids,
+			boolean json = true
 		)
 	{
 		return makeRequest(url=getApi_base() & "/me/tracks?ids=" & arguments.ids, access_token=arguments.access_token, method="PUT", json=arguments.json);
@@ -330,7 +331,8 @@ component accessors="true" {
 	**/
 	public any function removeUserSavedTracks(
 			required string access_token,
-			required string ids
+			required string ids,
+			boolean json = true
 		)
 	{
 		return makeRequest(url=getApi_base() & "/me/tracks?ids=" & arguments.ids, access_token=arguments.access_token, method="DELETE", json=arguments.json);
@@ -344,7 +346,8 @@ component accessors="true" {
 	**/
 	public any function checkUserSavedTracks(
 			required string access_token,
-			required string ids
+			required string ids,
+			boolean json = true
 		)
 	{
 		return makeRequest(url=getApi_base() & "/me/tracks/contains?ids=" & arguments.ids, access_token=arguments.access_token, method="GET", json=arguments.json);
@@ -362,17 +365,22 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function search(
-			required string access_token,
-			required string q,
-			required string type,
-			string market,
-			string limit = "20",
-			string offset ="0"
-		)
-	{
-		var args = structcopy(arguments);
-		structDelete(args,"access_token");
-		return makeRequest(url=getApi_base() & "/search?" & buildParamString(args), access_token=arguments.access_token, method="GET", json=arguments.json);
+		required string access_token,
+		required string q,
+		required string type,
+		string market,
+		string limit  = "20",
+		string offset = "0",
+		boolean json  = true
+	){
+		var args = structcopy( arguments );
+		structDelete( args, "access_token" );
+		return makeRequest(
+			url          = getApi_base() & "/search?" & buildParamString( args ),
+			access_token = arguments.access_token,
+			method       = "GET",
+			json         = arguments.json
+		);
 	}
 
 
@@ -386,24 +394,23 @@ component accessors="true" {
 
 
 	private any function makeRequest(
-			required string url,
-			string access_token = "",
-			string method = "GET",
-			boolean json = true
-		)
-	{
+		required string url,
+		string access_token = "",
+		string method = "GET",
+		boolean json = true
+	){
 		var httpService = new http(url=arguments.url, method=arguments.method);
 			if ( len(arguments.access_token) ) {
 					httpService.addParam(type="header",name="Authorization", value="Bearer #arguments.access_token#");
 			}
-		var request = httpService.send().getPrefix();
-		if ( json ) {
-			return request.FileContent.toString();
+		var stuResponse = httpService.send().getPrefix();
+		if( json ){
+			return stuResponse.FileContent.toString();
 		} else {
-			if ( len(request.FileContent.toString()) ) {
-				return deserializeJSON(request.FileContent);
+			if( len( stuResponse.FileContent.toString() ) ) {
+				return deserializeJSON( stuResponse.FileContent );
 			} else {
-				return request.FileContent.toString();
+				return stuResponse.FileContent.toString();
 			}
 		}
 	}
@@ -412,24 +419,27 @@ component accessors="true" {
 	/**
 	* hint I loop through a struct to convert to query params for the URL
 	*/
-	private function buildParamString(required struct argScope)
-	{
+	private function buildParamString(
+		required struct argScope
+	){
 		var strURLParam = "";
-		for (key in arguments.argScope) {
-			if (len(arguments.argScope[key])) {
-				if (listLen(strURLParam)) {
+		for( key in arguments.argScope ){
+			if( len( arguments.argScope[ key ] ) ){
+				if( listLen( strURLParam ) ){
 					strURLParam = strURLParam & '&';
 				}
-				strURLParam = strURLParam & lcase(key) & '=' & arguments.argScope[key];
+				strURLParam = strURLParam & lcase( key ) & '=' & arguments.argScope[ key ];
 			}
 		}
 		return strURLParam;
 	}
 
 
-	public function createAuthBase64(required string clientId, required string clientSecret)
-	{
-		return toBase64(arguments.clientId & ':' & arguments.clientSecret);
+	public function createAuthBase64(
+		required string clientId,
+		required string clientSecret
+	){
+		return toBase64( arguments.clientId & ':' & arguments.clientSecret );
 	}
 
 }
