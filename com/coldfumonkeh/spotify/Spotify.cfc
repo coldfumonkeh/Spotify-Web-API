@@ -101,7 +101,10 @@ component accessors="true" {
 		required string grant_type,
 		required string refresh_token
 	){
-		return requestToken(grant_type=arguments.grant_type, refresh_token=arguments.refresh_token);
+		return requestToken(
+			grant_type    = arguments.grant_type,
+			refresh_token = arguments.refresh_token
+		);
 	}
 
 
@@ -113,47 +116,65 @@ component accessors="true" {
 	/* Album Data */
 
 	/**
-	* hint - matching official endpoint /v1/albums/{id}
-	* @id The Spotify ID for this album
+	* Get Spotify catalog information for a single album.
+	* @id The Spotify ID for the album
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getAlbum(
 		required string id,
 		boolean json = true
 	){
-		return makeRequest(url=getApi_base() & "/albums/" & arguments.id, json=arguments.json);
+		return makeRequest(
+			url  = getApi_base() & "/albums/" & arguments.id,
+			json = arguments.json
+		);
 	}
 
 	/**
+	* Get Spotify catalog information for multiple albums identified by their Spotify IDs.
+	* 
+	* @ids A comma-separated list of the Spotify IDs for the albums. Maximum: 20 IDs. 
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getAlbums(
 		required string ids,
 		boolean json = true
 	){
-		return makeRequest(url=getApi_base() & "/albums?ids=" & arguments.ids, json=arguments.json);
+		return makeRequest( 
+			url  = getApi_base() & "/albums?ids=" & arguments.ids, 
+			json = arguments.json
+		);
 	}
 
 	/**
+	* Get Spotify catalog information about an album’s tracks. Optional parameters can be used to limit the number of tracks returned.
+	* 
 	* @id The Spotify ID for this album
 	* @limit Optional. The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50.
 	* @offset Optional. The index of the first item to return. Default: 0 (the first object). Use with limit to get the next set of items.
+	* @market Optional. An ISO 3166-1 alpha-2 country code or the string from_token. Provide this parameter if you want to apply Track Relinking.
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getAlbumTracks(
 		required string id,
-		string limit = "20",
-		string offset ="0",
-		boolean json = true
+		string limit  = "20",
+		string offset = "0",
+		string market = '',
+		boolean json  = true
 	){
 		var args = structcopy(arguments);
 		structDelete(args,"id");
-		return makeRequest(url=getApi_base() & "/albums/" & arguments.id & "/tracks?" & buildParamString(args), json=arguments.json);
+		return makeRequest(
+			url  = getApi_base() & "/albums/" & arguments.id & "/tracks?" & buildParamString( args ), 
+			json = arguments.json
+		);
 	}
 
 	/* Artist Data */
 
 	/**
+	* Get Spotify catalog information for a single artist identified by their unique Spotify ID.
+	* 
 	* @id The Spotify ID for this artist.
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
@@ -161,68 +182,94 @@ component accessors="true" {
 		required string id,
 		boolean json = true
 	){
-		return makeRequest(url=getApi_base() & "/artists/" & arguments.id, json=arguments.json);
+		return makeRequest(
+			url  = getApi_base() & "/artists/" & arguments.id, 
+			json = arguments.json
+		);
 	}
 
 	/**
+	* Get Spotify catalog information for several artists based on their Spotify IDs.
+	* 
+	* @ids Required. A comma-separated list of the Spotify IDs for the artists. Maximum: 50 IDs.
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getArtists(
 		required string ids,
 		boolean json = true
 	){
-		return makeRequest(url=getApi_base() & "/artists?ids=" & arguments.ids, json=arguments.json);
+		return makeRequest(
+			url  = getApi_base() & "/artists?ids=" & arguments.ids, 
+			json = arguments.json
+		);
 	}
 
 	/**
-	* @album_type Optional. A comma-separated list of keywords that will be used to filter the response. If not supplied, all album types will be returned. Valid values are: album, single, appears_on, compilation. For example: album_type=album,single
-	* @market Optional. An ISO 3166-1 alpha-2 country code. Supply this parameter to limit the response to one particular geographical market. For example, for albums available in Sweden: market=SE. If not given, results will be returned for all markets and you are likely to get duplicate results per album, one for each market in which the album is available!
+	* Get Spotify catalog information about an artist’s albums. Optional parameters can be specified in the query string to filter and sort the response.
+	* 
+	* @id The Spotify ID for the artist.
+	* @include_groups Optional. A comma-separated list of keywords that will be used to filter the response. If not supplied, all album types will be returned. Valid values are: album,single,appears_on,compilation. For example: include_groups=album,single.
+	* @country Optional. Optional. An ISO 3166-1 alpha-2 country code or the string from_token. Supply this parameter to limit the response to one particular geographical market. For example, for albums available in Sweden: country=SE. If not given, results will be returned for all countries and you are likely to get duplicate results per album, one for each country in which the album is available!
 	* @limit Optional. The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50.
 	* @offset Optional. The index of the first item to return. Default: 0 (the first object). Use with limit to get the next set of items.
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getArtistAlbums(
-			required string id,
-			string album_type,
-			string market,
-			string limit = "20",
-			string offset ="0",
-			boolean json = true
-		)
-	{
-		var args = structcopy(arguments);
-		structDelete(args,"id");
-		return makeRequest(url=getApi_base() & "/artists/" & arguments.id & "/albums?" & buildParamString(args), json=arguments.json);
+		required string id,
+		string include_groups = '',
+		string country        = '',
+		string limit          = "20",
+		string offset         = "0",
+		boolean json          = true
+	){
+		var args = structcopy( arguments );
+		structDelete( args, "id" );
+		return makeRequest(
+			url  = getApi_base() & "/artists/" & arguments.id & "/albums?" & buildParamString( args ), 
+			json = arguments.json
+		);
 	}
 
 	/**
-	* @country The country: an ISO 3166-1 alpha-2 country code.
+	* Get Spotify catalog information about an artist’s top tracks by country.
+	* 
+	* @id The Spotify ID for the artist.
+	* @country Required. An ISO 3166-1 alpha-2 country code or the string from_token.
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getArtistTopTracks(
-			required string ids,
-			required string country,
-			boolean json = true
-		)
-	{
-		return makeRequest(url=getApi_base() & "/artists/" & arguments.id & "/top-tracks?country=" & arguments.country, json=arguments.json);
+		required string ids,
+		required string country,
+		boolean json = true
+	){
+		return makeRequest(
+			url  = getApi_base() & "/artists/" & arguments.id & "/top-tracks?country = " & arguments.country, 
+			json = arguments.json
+		);
 	}
 
 	/**
+	* Get Spotify catalog information about artists similar to a given artist. Similarity is based on analysis of the Spotify community’s listening history.
+	* 
+	* @id The spotify ID for the artist
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getRelatedArtists(
-			required string ids,
-			boolean json = true
-		)
-	{
-		return makeRequest(url=getApi_base() & "/artists/" & arguments.id & "/related-artists", json=arguments.json);
+		required string id,
+		boolean json = true
+	){
+		return makeRequest(
+			url  = getApi_base() & "/artists/" & arguments.id & "/related-artists", 
+			json = arguments.json
+		);
 	}
 
 
 	/* Playlist Methods */
 
 	/**
+	* Get a list of Spotify featured playlists (shown, for example, on a Spotify player’s ‘Browse’ tab).
+	* 
 	* @access_token Required. A valid access token  from the Spotify Accounts service: see the Web API Authorization Guide for details. The access token must have been issued on behalf of the current user. Reading the user's email address requires the user-read-email scope; reading country, display name, profile images, and product subscription level requires the user-read-private scope. See Using Scopes.
 	* @locale Optional. The desired language, consisting of a lowercase ISO 639 language code and an uppercase ISO 3166-1 alpha-2 country code, joined by an underscore. For example: es_MX, meaning "Spanish (Mexico)". Provide this parameter if you want the results returned in a particular language (where available). Note that, if locale is not supplied, or if the specified language is not available, all strings will be returned in the Spotify default language (American English). The locale parameter, combined with the country parameter, may give odd results if not carefully matched. For example country=SE&locale=de_DE will return a list of categories relevant to Sweden but as German language strings.
 	* @country Optional. A country: an ISO 3166-1 alpha-2 country code. Provide this parameter if you want the list of returned items to be relevant to a particular country. If omitted, the returned items will be relevant to all countries.
@@ -232,21 +279,26 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getFeaturedPlaylists(
-			required string access_token,
-			string locale,
-			string country,
-			string timestamp,
-			string limit = "20",
-			string offset ="0",
-			boolean json = true
-		)
-	{
-		var args = structcopy(arguments);
-		structDelete(args,"access_token");
-		return makeRequest(url=getApi_base() & "/browse/featured-playlists?" & buildParamString(args), access_token=arguments.access_token, json=arguments.json);
+		required string access_token,
+		string locale,
+		string country,
+		string timestamp,
+		string limit  = "20",
+		string offset = "0",
+		boolean json  = true
+	){
+		var args = structcopy( arguments );
+		structDelete( args, "access_token" );
+		return makeRequest(
+			url          = getApi_base() & "/browse/featured-playlists?" & buildParamString( args ), 
+			access_token = arguments.access_token, 
+			json         = arguments.json
+		);
 	}
 
 	/**
+	* Get a list of new album releases featured in Spotify (shown, for example, on a Spotify player’s “Browse” tab).
+	* 
 	* @access_token Required. A valid access token  from the Spotify Accounts service: see the Web API Authorization Guide for details. The access token must have been issued on behalf of the current user. Reading the user's email address requires the user-read-email scope; reading country, display name, profile images, and product subscription level requires the user-read-private scope. See Using Scopes.
 	* @country Optional. A country: an ISO 3166-1 alpha-2 country code. Provide this parameter if you want the list of returned items to be relevant to a particular country. If omitted, the returned items will be relevant to all countries.
 	* @limit Optional. The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50.
@@ -254,30 +306,38 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getNewReleases(
-			required string access_token,
-			string country,
-			string limit = "20",
-			string offset ="0",
-			boolean json = true
-		)
-	{
-		var args = structcopy(arguments);
-		structDelete(args,"access_token");
-		return makeRequest(url=getApi_base() & "/browse/new-releases?" & buildParamString(args), access_token=arguments.access_token, json=arguments.json);
+		required string access_token,
+		string country,
+		string limit  = "20",
+		string offset = "0",
+		boolean json  = true
+	){
+		var args = structcopy( arguments );
+		structDelete( args, "access_token" );
+		return makeRequest(
+			url          = getApi_base() & "/browse/new-releases?" & buildParamString( args ),
+			access_token = arguments.access_token,
+			json         = arguments.json
+		);
 	}
 
 	/* Profile Data */
 
 	/**
+	* Get detailed profile information about the current user (including the current user’s username).
+	* 
 	* @access_token Required. A valid access token  from the Spotify Accounts service: see the Web API Authorization Guide for details. The access token must have been issued on behalf of the current user. Reading the user's email address requires the user-read-email scope; reading country, display name, profile images, and product subscription level requires the user-read-private scope. See Using Scopes.
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getMe(
-			required string access_token,
-			boolean json = true
-		)
-	{
-		return makeRequest(url=getApi_base() & "/me", access_token=arguments.access_token, json=arguments.json);
+		required string access_token,
+		boolean json = true
+	){
+		return makeRequest(
+			url          = getApi_base() & "/me", 
+			access_token = arguments.access_token, 
+			json         = arguments.json
+		);
 	}
 
 	/**
@@ -287,15 +347,18 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function getMyTracks(
-			required string access_token,
-			string limit = "20",
-			string offset ="0",
-			boolean json = true
-		)
-	{
-		var args = structcopy(arguments);
-		structDelete(args,"access_token");
-		return makeRequest(url=getApi_base() & "/me/tracks?" & buildParamString(args), access_token=arguments.access_token, json=arguments.json);
+		required string access_token,
+		string limit  = "20",
+		string offset = "0",
+		boolean json  = true
+	){
+		var args = structcopy( arguments );
+		structDelete( args, "access_token" );
+		return makeRequest(
+			url          = getApi_base() & "/me/tracks?" & buildParamString( args ), 
+			access_token = arguments.access_token, 
+			json         = arguments.json
+		);
 	}
 
 
@@ -306,12 +369,16 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function saveTracksForUser(
-			required string access_token,
-			required string ids,
-			boolean json = true
-		)
-	{
-		return makeRequest(url=getApi_base() & "/me/tracks?ids=" & arguments.ids, access_token=arguments.access_token, method="PUT", json=arguments.json);
+		required string access_token,
+		required string ids,
+		boolean json = true
+	){
+		return makeRequest(
+			url          = getApi_base() & "/me/tracks?ids=" & arguments.ids, 
+			access_token = arguments.access_token, 
+			method       = "PUT", 
+			json         = arguments.json
+		);
 	}
 
 	/**
@@ -336,12 +403,16 @@ component accessors="true" {
 	* @json If set to false ColdFusion will return a struct of data. If true (default) the 'natural' JSON response will be returned.
 	**/
 	public any function checkUserSavedTracks(
-			required string access_token,
-			required string ids,
-			boolean json = true
-		)
-	{
-		return makeRequest(url=getApi_base() & "/me/tracks/contains?ids=" & arguments.ids, access_token=arguments.access_token, method="GET", json=arguments.json);
+		required string access_token,
+		required string ids,
+		boolean json = true
+	){
+		return makeRequest(
+			url          = getApi_base() & "/me/tracks/contains?ids=" & arguments.ids,
+			access_token = arguments.access_token,
+			method       = "GET",
+			json         = arguments.json
+		);
 	}
 
 
@@ -387,13 +458,16 @@ component accessors="true" {
 	private any function makeRequest(
 		required string url,
 		string access_token = "",
-		string method = "GET",
-		boolean json = true
+		string method       = "GET",
+		boolean json        = true
 	){
-		var httpService = new http(url=arguments.url, method=arguments.method);
-			if ( len(arguments.access_token) ) {
-					httpService.addParam(type="header",name="Authorization", value="Bearer #arguments.access_token#");
-			}
+		var httpService = new http(
+			url    = arguments.url,
+			method = arguments.method
+		);
+		if( len( arguments.access_token ) ){
+			httpService.addParam( type="header", name="Authorization", value="Bearer #arguments.access_token#" );
+		}
 		var stuResponse = httpService.send().getPrefix();
 		if( json ){
 			return stuResponse.FileContent.toString();
